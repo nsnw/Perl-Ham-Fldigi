@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/Ham-Fldigi.t
+lib/Ham/Fldigi.pm
