@@ -19,6 +19,29 @@
 # To view, run:-
 # perldoc Client.pm
 
+=head1 NAME
+
+Ham::Fldigi::Client - Perl extension for communicating with Fldigi.
+
+=head1 SYNOPSIS
+
+  use Ham::Fldigi;
+  my $f = new Ham::Fldigi;
+	my $c = new Ham::Fldigi::Client('localhost', '7362', 'example');
+
+	$c->command('fldigi.version');
+
+=head1 DESCRIPTION
+
+This module is for communicating with individual Fldigi instances.
+
+It uses Fldigi's XMLRPC service, which usually runs on localhost:7362, providing support for it has been compiled in.
+
+=head2 EXPORT
+
+None by default.
+=cut
+
 package Ham::Fldigi::Client;
 
 use 5.012004;
@@ -45,6 +68,14 @@ has '_buffer_rx' => (is => 'ro');
 
 our $VERSION = '0.001';
 
+=head1 CONSTRUCTORS
+
+=head2 Client->new(I<hostname>, I<port>, I<name>)
+
+Creates a new B<Ham::Fldigi::Client> object with the specified arguments.
+
+=cut
+
 sub new {
 	
 	# Get our name, and set an ID
@@ -63,18 +94,32 @@ sub new {
 	$self->debug("Constructor called. Version ".$VERSION.", with ID ".$self->id.".");
 
 	# Grab the passed client details
-	my ($hostname, $port, $name) = @_;
-	$self->hostname($hostname);
-	$self->port($port);
-	$self->name($name);
-	$self->{url} = 'http://'.$hostname.':'.$port.'/RPC2';
-	$self->debug("Hostname is ".$hostname.", port is ".$port." and name is ".$name.".");
+	my (%params) = @_;
+	if(defined($params{'Hostname'})) {
+		$self->hostname($params{'Hostname'});
+	} else {
+		$self->hostname("localhost");
+	}
+	if(defined($params{'Port'})) {
+		$self->port($params{'Port'});
+	} else {
+		$self->port(7362);
+	}
+	if(defined($params{'Name'})) {
+		$self->name($params{'Name'});
+	} else {
+		$self->name($self->id);
+	}
+
+	$self->{url} = 'http://'.$self->hostname.':'.$self->port.'/RPC2';
+	$self->debug("Hostname is ".$self->hostname.", port is ".$self->port." and name is ".$self->name.".");
+	$self->debug("XML-RPC URL is ".$self->url.".");
 
 	# Initialise the RPC::XML::Client object
-	$self->{_xmlrpc} = RPC::XML::Client->new('http://'.$hostname.':'.$port.'/RPC2');
+	$self->{_xmlrpc} = RPC::XML::Client->new($self->url);
 
 	# Check connectivity with the fldigi client by checking the version
-	$self->debug("Checking connectivity with fldigi client at http://".$hostname.":".$port."/RPC2...");
+	$self->debug("Checking connectivity with fldigi client at ".$self->url."...");
 	my $fldigi_version = $self->version;
 
 	if(defined($fldigi_version)) {
@@ -86,6 +131,14 @@ sub new {
 	$self->debug("Returning...");
 	return $self;
 }
+
+=head1 METHODS
+
+=head2 Client->command(I<command>, [I<arguments>])
+
+Send command I<command>, with optional arguments I<arguments>.
+
+=cut
 
 sub command {
 
@@ -99,8 +152,9 @@ sub command {
 
 	# Check for undef response, which means there's been an error
 	if($RPC::XML::ERROR ne "") {
-		$self->warning("Error talking to ".$self->url."!");
-		$self->warning("RPC::XML::Client reports: ".$RPC::XML::ERROR);
+		$self->error("Error talking to ".$self->url."!");
+		$self->error("RPC::XML::Client reports: ".$RPC::XML::ERROR);
+		return undef;
 	}
 
 	# If there's no response from XMLRPC, set it to '(null)'
@@ -109,6 +163,12 @@ sub command {
 	$self->debug("Response from XMLRPC request is: ".$r);
 	return $r;
 }
+
+=head2 Client->version
+
+Query for the version of Fldigi.
+
+=cut
 
 sub version {
 
@@ -119,13 +179,11 @@ sub version {
 
 }
 
-sub modem {
+=head2 Client->send("I<text>")
 
-	my ($self, $modem) = @_;
-	my $r = $self->command('modem.set_by_name', $modem);
+Clears the TX window of any existing text, adds the text passed as I<text>, and then transmits. It automatically adds a '^r' at the end to tell Fldigi to switch back to RX afterwards.
 
-	return $r;
-}
+=cut
 
 sub send {
 
@@ -142,45 +200,14 @@ sub send {
 
 1;
 __END__
-# Below is stub documentation for your module. You'd better edit it!
-
-=head1 NAME
-
-Ham::Fldigi - Perl extension for blah blah blah
-
-=head1 SYNOPSIS
-
-  use Ham::Fldigi;
-  blah blah blah
-
-=head1 DESCRIPTION
-
-Stub documentation for Ham::Fldigi, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
-
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+The source code for this module is hosted on Github at L<https://github.com/m0vkg/Perl-Ham-Fldigi>.
 
 =head1 AUTHOR
 
-Andy Smith, E<lt>andys@E<gt>
+Andy Smith M0VKG, E<lt>andy@m0vkg.org.ukE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -189,6 +216,5 @@ Copyright (C) 2012 by Andy Smith
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.12.4 or,
 at your option, any later version of Perl 5 you may have available.
-
 
 =cut

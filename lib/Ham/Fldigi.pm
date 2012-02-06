@@ -1,96 +1,134 @@
+#!/usr/bin/perl
+
+#==============================================================================
+# Ham::Fldigi
+# v0.001
+# (c) 2012 Andy Smith, M0VKG
+#==============================================================================
+# DESCRIPTION
+# Perl extensions for managing Fldigi instances
+#==============================================================================
+# SYNOPSIS
+# use Ham::Fldigi;
+# my $client = Ham::Fldigi::Client->new('localhost', 7362, 'default');
+# $client->modem("BPSK125");
+# $client->send("CQ CQ CQ DE M0VKG M0VKG M0VKG KN");
+#==============================================================================
+
+# Perl documentation is provided inline in pod format.
+# To view, run:-
+# perldoc Ham::Fldigi
+
+=head1 NAME
+
+Ham::Fldigi - Perl extensions for managing Fldigi instances
+
+=head1 SYNOPSIS
+
+	use Ham::Fldigi;
+
+=head1 DESCRIPTION
+
+This module itself doesn't do much - see C<Ham::Fldigi::Client> for details.
+
+=head2 EXPORT
+
+None by default.
+=cut
+
 package Ham::Fldigi;
 
 use 5.012004;
 use strict;
 use warnings;
 
-our $VERSION = '0.0001';
+our $VERSION = '0.001';
 
 use Ham::Fldigi::Client;
 use POE qw(Wheel::Run);
 use base qw(Ham::Fldigi::Debug);
 
+=head1 CONSTRUCTORS
+
+=head2 Fldigi->new([I<LogLevel> => n, ] [I<LogFile> => filename, ] [I<LogPrint> => (0|1), ] [I<LogWrite> => (0|1)]) 
+
+Creates a new B<Ham::Fldigi> object with the specified options.
+
+=item * 
+
+I<LogLevel> is an integer between 0 and 4, with 0 being no logging at all, 1 for errors, 2 for warnings, 3 for notices and 4 for debugging. This defaults to B<2>, which will display and log errors and warnings.
+
+=item *
+
+I<LogFile> is the path to the logfile that will be written to.
+
+=item *
+
+I<LogPrint> is whether to print log messages to screen or not.
+
+=item *
+
+I<LogWrite> is whether to log messages to the logfile or not.
+
+=cut
+
 sub new {
 	
 	# Get the class name
-	my $class = shift;
+	my($class) = shift;
+	my(%params) = @_;
 
 	my $self = {
 		'version' => $VERSION,
 	};
 
+	if(defined($params{'LogLevel'})) {
+		$Ham::Fldigi::Debug::debug_level = $params{'LogLevel'};
+	}
+	if(defined($params{'LogFile'})) {
+		$Ham::Fldigi::Debug::debug_file = $params{'LogFile'};
+	}
+	if(defined($params{'LogPrint'})) {
+		$Ham::Fldigi::Debug::debug_print = $params{'LogPrint'};
+	}
+	if(defined($params{'LogWrite'})) {
+		$Ham::Fldigi::Debug::debug_write = $params{'LogWrite'};
+	}
+
 	bless $self, $class;
 
 	$self->debug("Constructor called. Version is ".$VERSION.".");
-
-	# Start the POE kernel. At this point, this does nothing - it's purely to
-	# prevent it from printing an error if we're not using the monitoring
-	# methods. Use monitor() for actually starting those.
-	POE::Kernel->run();
-
 	$self->debug("Returning...");
 	return $self;
 }
 
+=head1 MEHTODS
+
+=head2 Fldigi->client(I<hostname>, I<port>, I<name>)
+
+Creates a new B<Ham::Fldigi::Client> object with the specified arguments. See C<Ham::Fldigi::Client> for more details.
+
+=cut
+
 sub client {
 
-	my ($self, $hostname, $port, $name) = @_;
+	my ($self, %params) = @_;
 
-	my $c = Ham::Fldigi::Client->new($hostname, $port, $name);
+	my $c = Ham::Fldigi::Client->new(%params);
 
 	return $c;
 }
 
-sub monitor {
-
-	my ($self) = @_;
-	# Start the POE kernel
-	$self->debug("Starting POE kernel...");
-	POE::Kernel->run();
-
-}
-
 1;
 __END__
-# Below is stub documentation for your module. You'd better edit it!
-
-=head1 NAME
-
-Ham::Fldigi - Perl extension for blah blah blah
-
-=head1 SYNOPSIS
-
-  use Ham::Fldigi;
-  blah blah blah
-
-=head1 DESCRIPTION
-
-Stub documentation for Ham::Fldigi, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
-=head2 EXPORT
-
-None by default.
-
-
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+The source code for this module is hosted on Github at L<https://github.com/m0vkg/Perl-Ham-Fldigi>.
 
 =head1 AUTHOR
 
-Andy Smith, E<lt>andys@E<gt>
+Andy Smith M0VKG, E<lt>andy@m0vkg.org.ukE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -100,5 +138,5 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.12.4 or,
 at your option, any later version of Perl 5 you may have available.
 
-
 =cut
+
