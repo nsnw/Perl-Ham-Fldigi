@@ -102,7 +102,7 @@ sub debug {
 
 	if($debug_level ge 4) {
 		if($debug_print eq 1) {
-			print STDERR $logmsg;
+			print STDERR "\r".$logmsg;
 		}
 		if($debug_write eq 1) {
 			open (LOGFILE, '>>'.$debug_file);
@@ -135,7 +135,7 @@ sub error {
 
 	if($debug_level ge 1) {
 		if($debug_print eq 1) {
-			print STDERR $logmsg;
+			print STDERR "\r".$logmsg;
 		}
 		if($debug_write eq 1) {
 			open (LOGFILE, '>>'.$debug_file);
@@ -169,7 +169,7 @@ sub warning {
 
 	if($debug_level ge 2) {
 		if($debug_print eq 1) {
-			print STDERR $logmsg;
+			print STDERR "\r".$logmsg;
 		}
 		if($debug_write eq 1) {
 			open (LOGFILE, '>>'.$debug_file);
@@ -203,7 +203,7 @@ sub notice {
 
 	if($debug_level ge 3) {
 		if($debug_print eq 1) {
-			print STDERR $logmsg;
+			print STDERR "\r".$logmsg;
 		}
 		if($debug_write eq 1) {
 			open (LOGFILE, '>>'.$debug_file);

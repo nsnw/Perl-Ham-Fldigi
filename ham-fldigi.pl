@@ -22,5 +22,9 @@ my $c = $f->client('Hostname' => "localhost", 'Port' => 7362, 'Name' => "test");
 if(!defined($c)) { croak("Couldn't connect to fldigi!"); };
 
 # Set the modem to BPSK125 and transmit some text.
-$c->command("modem.set_by_name", "BPSK125");
+#$c->command("modem.set_by_name", "BPSK125");
 #$c->send("CQ CQ CQ DE M0QQQ M0QQQ M0QQQ KN");
+#my $s = $f->shell('Client' => $c);
+my $s = $f->shell();
+#$s->client($c);
+$s->start;

@@ -44,9 +44,13 @@ use warnings;
 
 our $VERSION = '0.001';
 
+use Moose;
 use Ham::Fldigi::Client;
+use Ham::Fldigi::Shell;
 use POE qw(Wheel::Run);
 use base qw(Ham::Fldigi::Debug);
+
+has 'clients' => (is => 'ro', isa => 'HashRef[Ham::Fldigi::Client');
 
 =head1 CONSTRUCTORS
 
@@ -115,8 +119,21 @@ sub client {
 	my ($self, %params) = @_;
 
 	my $c = Ham::Fldigi::Client->new(%params);
+	$self->{clients}{$c->name} = $c;
 
 	return $c;
+}
+
+sub shell {
+
+	my ($self, %params) = @_;
+
+	$params{'Parent'} = $self;
+
+	my $s = Ham::Fldigi::Shell->new(%params);
+
+	return $s;
+
 }
 
 1;
