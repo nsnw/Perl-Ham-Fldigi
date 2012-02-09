@@ -1,6 +1,6 @@
 #==============================================================================
-# Ham::Fldigi
-# v0.001
+# Ham::Fldigi::Debug
+# v0.002
 # (c) 2012 Andy Smith, M0VKG
 #==============================================================================
 # DESCRIPTION
@@ -8,7 +8,13 @@
 #==============================================================================
 # SYNOPSIS
 # use Ham::Fldigi;
-# my $client = Ham::Fldigi::Client->new('localhost', 7362, 'default');
+# my $f = new Ham::Fldigi('LogLevel' => 4,
+#                         'LogFile' => './debug.log',
+#                         'LogPrint' => 1,
+#                         'LogWrite' => 1);
+# my $client = $f->client('Hostname' => 'localhost',
+#                         'Port' => '7362',
+#                         'Name' => 'default');
 # $client->modem("BPSK125");
 # $client->send("CQ CQ CQ DE M0VKG M0VKG M0VKG KN");
 #==============================================================================
@@ -57,6 +63,7 @@ our @ISA = qw(Exporter);
 our %EXPORT_TAGS = ( 'all' => [ qw() ] );
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(debug error warning notice);
+our $VERSION = 0.002;
 
 our $debug_level = 0;
 our $debug_print = 0;

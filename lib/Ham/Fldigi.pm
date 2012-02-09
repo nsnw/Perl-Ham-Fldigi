@@ -2,7 +2,7 @@
 
 #==============================================================================
 # Ham::Fldigi
-# v0.001
+# v0.002
 # (c) 2012 Andy Smith, M0VKG
 #==============================================================================
 # DESCRIPTION
@@ -10,7 +10,13 @@
 #==============================================================================
 # SYNOPSIS
 # use Ham::Fldigi;
-# my $client = Ham::Fldigi::Client->new('localhost', 7362, 'default');
+# my $f = new Ham::Fldigi('LogLevel' => 4,
+#                         'LogFile' => './debug.log',
+#                         'LogPrint' => 1,
+#                         'LogWrite' => 1);
+# my $client = $f->client('Hostname' => 'localhost',
+#                         'Port' => '7362',
+#                         'Name' => 'default');
 # $client->modem("BPSK125");
 # $client->send("CQ CQ CQ DE M0VKG M0VKG M0VKG KN");
 #==============================================================================
@@ -42,12 +48,11 @@ use 5.012004;
 use strict;
 use warnings;
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 use Moose;
 use Ham::Fldigi::Client;
 use Ham::Fldigi::Shell;
-use POE qw(Wheel::Run);
 use base qw(Ham::Fldigi::Debug);
 
 has 'clients' => (is => 'ro', isa => 'HashRef[Ham::Fldigi::Client');
@@ -106,9 +111,9 @@ sub new {
 	return $self;
 }
 
-=head1 MEHTODS
+=head1 METHODS
 
-=head2 Fldigi->client(I<hostname>, I<port>, I<name>)
+=head2 Fldigi->client('Hostname' => I<hostname>, 'Port' => I<port>, 'Name' => I<name>)
 
 Creates a new B<Ham::Fldigi::Client> object with the specified arguments. See C<Ham::Fldigi::Client> for more details.
 
@@ -118,11 +123,28 @@ sub client {
 
 	my ($self, %params) = @_;
 
+	# Create a new Ham::Fldigi::Client object
 	my $c = Ham::Fldigi::Client->new(%params);
-	$self->{clients}{$c->name} = $c;
+	if(!defined $c) {
+		# We didn't get a Ham::Fldigi::Client object back
+		$self->error("Error creating Ham::Fldigi::Client object!");
+		return undef;
+	} else {
+		# Add the client to the 'clients' hash
+		$self->{clients}{$c->name} = $c;
+	}
 
+	# Return the previously returned Ham::Fldigi::Client object
 	return $c;
 }
+
+=head2 Fldigi->shell()
+
+Creates an Fldigi shell object.
+
+This is an attempt to create a more featured replacement for Fldigi's bundled 'fldigi-shell'. This is still under development and shouldn't be used yet.
+
+=cut
 
 sub shell {
 

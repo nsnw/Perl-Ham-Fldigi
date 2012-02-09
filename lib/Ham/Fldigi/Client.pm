@@ -2,7 +2,7 @@
 
 #==============================================================================
 # Ham::Fldigi::Client
-# v0.001
+# v0.002
 # (c) 2012 Andy Smith, M0VKG
 #==============================================================================
 # DESCRIPTION
@@ -10,7 +10,13 @@
 #==============================================================================
 # SYNOPSIS
 # use Ham::Fldigi;
-# my $client = Ham::Fldigi::Client->new('localhost', 7362, 'default');
+# my $f = new Ham::Fldigi('LogLevel' => 4,
+#													'LogFile' => './debug.log',
+#													'LogPrint' => 1,
+#													'LogWrite' => 1);
+# my $client = $f->client('Hostname' => 'localhost',
+#													'Port' => '7362',
+#													'Name' => 'default');
 # $client->modem("BPSK125");
 # $client->send("CQ CQ CQ DE M0VKG M0VKG M0VKG KN");
 #==============================================================================
@@ -27,7 +33,9 @@ Ham::Fldigi::Client - Perl extension for communicating with Fldigi.
 
   use Ham::Fldigi;
   my $f = new Ham::Fldigi;
-	my $c = new Ham::Fldigi::Client('localhost', '7362', 'example');
+	my $c = $f->client('Hostname' => 'localhost',
+										 'Port' => '7362',
+										 'Name' => 'example');
 
 	$c->command('fldigi.version');
 
@@ -66,13 +74,13 @@ has '_session' => (is => 'ro');
 has '_buffer_tx' => (is => 'ro');
 has '_buffer_rx' => (is => 'ro');
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 =head1 CONSTRUCTORS
 
-=head2 Client->new(I<hostname>, I<port>, I<name>)
+=head2 Client->new('Hostname' => I<hostname>, 'Port' => I<port>, 'Name' => I<name>)
 
-Creates a new B<Ham::Fldigi::Client> object with the specified arguments.
+Creates a new B<Ham::Fldigi::Client> object with the specified arguments. By default, 'localhost' and '7362' are assumed for I<Hostname> and I<Port> respectively. I<Name> is for use with C<Ham::Fldigi::Shell>, and can be safely left blank.
 
 =cut
 
@@ -93,7 +101,8 @@ sub new {
 
 	$self->debug("Constructor called. Version ".$VERSION.", with ID ".$self->id.".");
 
-	# Grab the passed client details
+	# Grab the passed client details.
+	# Assume localhost, 7362 and the GUID for the name if no options passed.
 	my (%params) = @_;
 	if(defined($params{'Hostname'})) {
 		$self->hostname($params{'Hostname'});
@@ -111,6 +120,7 @@ sub new {
 		$self->name($self->id);
 	}
 
+	# Generate the XML-RPC URL from the parameters
 	$self->{url} = 'http://'.$self->hostname.':'.$self->port.'/RPC2';
 	$self->debug("Hostname is ".$self->hostname.", port is ".$self->port." and name is ".$self->name.".");
 	$self->debug("XML-RPC URL is ".$self->url.".");
@@ -122,12 +132,14 @@ sub new {
 	$self->debug("Checking connectivity with fldigi client at ".$self->url."...");
 	my $fldigi_version = $self->version;
 
+	# If we get a version back, everything's fine.
 	if(defined($fldigi_version)) {
 		$self->debug("Version is ".$fldigi_version.".");
 	} else {
 		return undef;
 	}
 
+	# Return...
 	$self->debug("Returning...");
 	return $self;
 }
