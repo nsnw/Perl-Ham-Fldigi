@@ -163,7 +163,7 @@ __END__
 
 =head1 SEE ALSO
 
-The source code for this module is hosted on Github at L<https://github.com/m0vkg/Perl-Ham-Fldigi>.
+The source code for this module is hosted on Github at L<https://github.com/ve7cxz/Perl-Ham-Fldigi>.
 
 =head1 AUTHOR
 
