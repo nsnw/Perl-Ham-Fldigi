@@ -15,6 +15,11 @@ WriteMakefile(
 													'Term::ANSIColor'		=> '2.02',
 													'DateTime'					=> '0.72',
 													}, # e.g., Module::Name => 1.1
+    META_MERGE        => {
+        resources => {
+            repository => 'https://github.com/ve7cxz/Perl-Ham-Fldigi',
+        },
+    },
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/Ham/Fldigi.pm', # retrieve abstract from module
        AUTHOR         => 'Andy Smith <andy@m0vkg.org.uk>') : ()),
